@@ -1,29 +1,22 @@
 #include "mandelbrotwidget.h"
-#include <QPainter>
 #include <QMouseEvent>
+#include <QPainter>
 #include <complex>
+#include <vector>
 
-MandelbrotWidget::MandelbrotWidget(QWidget *parent)
-    : QWidget(parent),
-      minX(-2.0), maxX(1.0),
-      minY(-1.5), maxY(1.5),
-      maxIterations(200),
-      zoomCount(0),
-      maxZoom(6),
-      selecting(false)
-{
+MandelbrotWidget::MandelbrotWidget(QWidget *parent) :
+    QWidget(parent), minX(-2.0), maxX(1.0), minY(-1.5), maxY(1.5), maxIterations(200), zoomCount(0), maxZoom(6),
+    selecting(false) {
     setMinimumSize(800, 800);
     generateMandelbrot();
 }
 
-void MandelbrotWidget::generateMandelbrot()
-{
+void MandelbrotWidget::generateMandelbrot() {
+
     image = QImage(width(), height(), QImage::Format_RGB32);
 
-    for (int px = 0; px < width(); ++px)
-    {
-        for (int py = 0; py < height(); ++py)
-        {
+    for (int px = 0; px < width(); ++px) {
+        for (int py = 0; py < height(); ++py) {
             double x0 = minX + px * (maxX - minX) / width();
             double y0 = minY + py * (maxY - minY) / height();
 
@@ -32,44 +25,40 @@ void MandelbrotWidget::generateMandelbrot()
 
             int iteration = 0;
 
-            while (abs(z) <= 2.0 && iteration < maxIterations)
-            {
+            while (abs(z) <= 2.0 && iteration < maxIterations) {
                 z = z * z + c;
                 iteration++;
             }
 
-           long double color;
+            long double color;
 
-            if (iteration == maxIterations)
-            {
+            if (iteration == maxIterations) {
                 color = 0;
-            }
-            else
-            {
+            } else {
                 color = (long double) iteration / (long double) maxIterations;
             }
 
-            image.setPixel(px, py, qRgb(255.0 * 9.0 * color * color * color * (1 - color), 255.0 * 15.0 * (1 - color) * (1 - color) * color * color, 255.0 * 8.5 * (1 - color) * (1 - color) * (1 - color) * color));
+            image.setPixel(px, py,
+                           qRgb(255.0 * 9.0 * color * color * color * (1 - color),
+                                255.0 * 15.0 * (1 - color) * (1 - color) * color * color,
+                                255.0 * 8.5 * (1 - color) * (1 - color) * (1 - color) * color));
         }
     }
-
+    pos.push_back({minX, maxX, minY, maxY});
     update();
 }
 
-void MandelbrotWidget::paintEvent(QPaintEvent *)
-{
+void MandelbrotWidget::paintEvent(QPaintEvent *) {
     QPainter painter(this);
     painter.drawImage(0, 0, image);
 
-    if (selecting)
-    {
-        painter.setPen(Qt::red);
+    if (selecting) {
+        painter.setPen(Qt::blue);
         painter.drawRect(QRect(startPoint, endPoint));
     }
 }
 
-void MandelbrotWidget::mousePressEvent(QMouseEvent *event)
-{
+void MandelbrotWidget::mousePressEvent(QMouseEvent *event) {
     if (zoomCount >= maxZoom)
         return;
 
@@ -78,17 +67,14 @@ void MandelbrotWidget::mousePressEvent(QMouseEvent *event)
     endPoint = startPoint;
 }
 
-void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event)
-{
-    if (selecting)
-    {
+void MandelbrotWidget::mouseMoveEvent(QMouseEvent *event) {
+    if (selecting) {
         endPoint = event->pos();
         update();
     }
 }
 
-void MandelbrotWidget::mouseReleaseEvent(QMouseEvent *event)
-{
+void MandelbrotWidget::mouseReleaseEvent(QMouseEvent *event) {
     if (!selecting || zoomCount >= maxZoom)
         return;
 
@@ -109,17 +95,30 @@ void MandelbrotWidget::mouseReleaseEvent(QMouseEvent *event)
     maxY = newMaxY;
 
     zoomCount++;
-
     generateMandelbrot();
 }
 
-void MandelbrotWidget::resetView()
-{
+void MandelbrotWidget::resetView() {
     minX = -2.0;
     maxX = 1.0;
     minY = -1.5;
     maxY = 1.5;
     zoomCount = 0;
+
+    generateMandelbrot();
+}
+
+void MandelbrotWidget::prevView() {
+    if (zoomCount == 0) {
+        return;
+    }
+    zoomCount--;
+    pos.pop_back();
+
+    minX = pos[pos.size() - 1][0];
+    maxX = pos[pos.size() - 1][1];
+    minY = pos[pos.size() - 1][2];
+    maxY = pos[pos.size() - 1][3];
 
     generateMandelbrot();
 }
