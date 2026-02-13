@@ -1,17 +1,18 @@
 #ifndef MANDELBROTWIDGET_H
 #define MANDELBROTWIDGET_H
 
-#include <QWidget>
 #include <QImage>
 #include <QPoint>
+#include <QWidget>
+#include <vector>
 
-class MandelbrotWidget : public QWidget
-{
+class MandelbrotWidget : public QWidget {
     Q_OBJECT
 public:
     explicit MandelbrotWidget(QWidget *parent = nullptr);
 
     void resetView();
+    void prevView();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -34,6 +35,8 @@ private:
     QPoint startPoint;
     QPoint endPoint;
     bool selecting;
+
+    std::vector<std::vector<double>> pos;
 };
 
 #endif
