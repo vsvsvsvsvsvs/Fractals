@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <complex>
 #include <vector>
+#include <iostream>
 
 MandelbrotWidget::MandelbrotWidget(QWidget *parent) :
     QWidget(parent), minX(-2.0), maxX(1.0), minY(-1.5), maxY(1.5), maxIterations(200), zoomCount(0), maxZoom(6),
@@ -84,15 +85,15 @@ void MandelbrotWidget::mouseReleaseEvent(QMouseEvent *event) {
     QRect selection(startPoint, endPoint);
     selection = selection.normalized();
 
-    double newMinX = minX + selection.left() * (maxX - minX) / width();
-    double newMaxX = minX + selection.right() * (maxX - minX) / width();
-    double newMinY = minY + selection.top() * (maxY - minY) / height();
-    double newMaxY = minY + selection.bottom() * (maxY - minY) / height();
+    double new_minX = minX + selection.left() * (maxX - minX) / width();
+    double new_maxX = minX + selection.right() * (maxX - minX) / width();
+    double new_minY = minY + selection.top() * (maxY - minY) / height();
+    double new_maxY = minY + selection.bottom() * (maxY - minY) / height();
 
-    minX = newMinX;
-    maxX = newMaxX;
-    minY = newMinY;
-    maxY = newMaxY;
+    minX = new_minX;
+    maxX = new_maxX;
+    minY = new_minY;
+    maxY = new_maxY;
 
     zoomCount++;
     generateMandelbrot();
@@ -114,11 +115,10 @@ void MandelbrotWidget::prevView() {
     }
     zoomCount--;
     pos.pop_back();
-
     minX = pos[pos.size() - 1][0];
     maxX = pos[pos.size() - 1][1];
     minY = pos[pos.size() - 1][2];
     maxY = pos[pos.size() - 1][3];
-
+    pos.pop_back();
     generateMandelbrot();
 }
