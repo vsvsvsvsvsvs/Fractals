@@ -104,7 +104,7 @@ void MandelbrotWidget::resetView() {
     minY = -1.5;
     maxY = 1.5;
     zoomCount = 0;
-
+    pos.clear();
     generateMandelbrot();
 }
 
